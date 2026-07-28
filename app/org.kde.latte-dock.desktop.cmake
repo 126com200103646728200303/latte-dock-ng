@@ -126,5 +126,6 @@ X-KDE-PluginInfo-Email=@EMAIL@
 X-KDE-PluginInfo-Version=@VERSION@
 X-KDE-PluginInfo-Website=@WEBSITE@
 X-KDE-StartupNotify=false
+X-KDE-autostart-phase=2
 X-KDE-SubstituteUID=false
 X-KDE-Wayland-Interfaces=org_kde_plasma_window_management,org_kde_kwin_keystate,zkde_screencast_unstable_v1

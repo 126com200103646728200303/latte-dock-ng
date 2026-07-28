@@ -46,6 +46,7 @@
 #include <QSocketNotifier>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QThread>
 #include <QTimer>
 
 // KDE
@@ -108,9 +109,34 @@ int main(int argc, char **argv)
     applyUserLocalPluginPaths();
     qunsetenv("QT_WAYLAND_DISABLE_FIXED_POSITIONS");
 
+    // During system startup the Wayland compositor may not be immediately
+    // detectable, especially when launched via XDG autostart or systemd
+    // before the session is fully settled.  Retry a few times before
+    // giving up to cover both cold-boot races and transient compositor
+    // re-initialization (e.g. kwin_wayland restarts).
     if (!KWindowSystem::isPlatformWayland()) {
-        qCritical() << "Latte-Dock Wayland-only build requires a Wayland Plasma session.";
-        return 1;
+        const int maxRetries = 10;
+        const int retryDelayMs = 500;
+        bool waylandReady = false;
+
+        for (int i = 0; i < maxRetries; ++i) {
+            QThread::msleep(retryDelayMs);
+            QCoreApplication::processEvents();
+
+            if (KWindowSystem::isPlatformWayland()) {
+                waylandReady = true;
+                qInfo() << "Wayland platform detected after" << ((i + 1) * retryDelayMs) << "ms.";
+                break;
+            }
+
+            qWarning() << "Waiting for Wayland platform..."
+                        << "attempt" << (i + 1) << "of" << maxRetries;
+        }
+
+        if (!waylandReady) {
+            qCritical() << "Latte-Dock Wayland-only build requires a Wayland Plasma session.";
+            return 1;
+        }
     }
 
     if (!qpaVariable) {
@@ -234,6 +260,8 @@ int main(int argc, char **argv)
 
     if (parser.isSet(QStringLiteral("enable-autostart"))) {
         Latte::Layouts::Importer::enableAutostart();
+        qGuiApp->exit();
+        return 0;
     }
 
     if (parser.isSet(QStringLiteral("disable-autostart"))) {

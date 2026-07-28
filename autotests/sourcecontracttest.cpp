@@ -49,6 +49,10 @@ private Q_SLOTS:
     void cmakeAutotestRegistrationMaintainsAggregateTarget();
     void cmakePackagingConfigLivesInModule();
     void autostartDefaultEnabledContracts();
+    void desktopFileHasAutostartPhaseKey();
+    void enableAutostartExitsImmediately();
+    void waylandCheckHasRetryMechanism();
+    void enableAutostartUpdatesOutdatedFile();
     void cmakeWarningRelaxationLivesInModule();
     void cmakeFindsQtCoreToolsBeforeKdeInstallDirs();
     void qtQuickGpuPreferenceKeepsSoftwareFallbackAvailable();
@@ -1294,7 +1298,70 @@ void SourceContractTest::autostartDefaultEnabledContracts()
     QVERIFY(importer.open(QFile::ReadOnly));
     const QString importerSource = QString::fromUtf8(importer.readAll());
     QVERIFY(importerSource.contains(QStringLiteral("\"/autostart/org.kde.latte-dock.desktop\"")));
-    QVERIFY(importerSource.contains(QStringLiteral("standardPath(\"applications/org.kde.latte-dock.desktop\", false)")));
+    QVERIFY(importerSource.contains(QStringLiteral("standardPath(\"applications/org.kde.latte-dock.desktop\", true)")));
+}
+
+void SourceContractTest::desktopFileHasAutostartPhaseKey()
+{
+    //! The shipped desktop file must include X-KDE-autostart-phase=2 so
+    //! ksmserver launches latte-dock after the session is fully restored,
+    //! avoiding races with Wayland compositor and DBus initialization.
+    QFile desktopTemplate(QStringLiteral(LATTE_SOURCE_DIR "/app/org.kde.latte-dock.desktop.cmake"));
+    QVERIFY(desktopTemplate.open(QFile::ReadOnly));
+    const QString content = QString::fromUtf8(desktopTemplate.readAll());
+    QVERIFY(content.contains(QStringLiteral("X-KDE-autostart-phase=2")));
+}
+
+void SourceContractTest::enableAutostartExitsImmediately()
+{
+    //! --enable-autostart must only set up the autostart file and exit,
+    //! not proceed to full application startup (which would require a
+    //! running Wayland compositor).
+    QFile mainCpp(QStringLiteral(LATTE_SOURCE_DIR "/app/main.cpp"));
+    QVERIFY(mainCpp.open(QFile::ReadOnly));
+    const QString content = QString::fromUtf8(mainCpp.readAll());
+
+    const int enableIdx = content.indexOf(QStringLiteral("\"enable-autostart\""));
+    QVERIFY(enableIdx >= 0);
+
+    const int exitCall = content.indexOf(QStringLiteral("qGuiApp->exit();"), enableIdx);
+    QVERIFY(exitCall > enableIdx);
+
+    const int returnZero = content.indexOf(QStringLiteral("return 0;"), exitCall);
+    QVERIFY(returnZero > exitCall);
+}
+
+void SourceContractTest::waylandCheckHasRetryMechanism()
+{
+    //! The Wayland platform check during startup must retry instead of
+    //! failing immediately, so cold-boot timing races with the compositor
+    //! do not cause a permanent autostart failure.
+    QFile mainCpp(QStringLiteral(LATTE_SOURCE_DIR "/app/main.cpp"));
+    QVERIFY(mainCpp.open(QFile::ReadOnly));
+    const QString content = QString::fromUtf8(mainCpp.readAll());
+
+    const int waylandCheck = content.indexOf(QStringLiteral("isPlatformWayland()"));
+    QVERIFY(waylandCheck >= 0);
+
+    const int maxRetries = content.indexOf(QStringLiteral("maxRetries"), waylandCheck);
+    QVERIFY(maxRetries > waylandCheck);
+
+    const int msleep = content.indexOf(QStringLiteral("QThread::msleep"), waylandCheck);
+    QVERIFY(msleep > waylandCheck);
+}
+
+void SourceContractTest::enableAutostartUpdatesOutdatedFile()
+{
+    //! enableAutostart() must update the autostart desktop file when the
+    //! system-installed source is newer (e.g. after a package upgrade).
+    //! Otherwise users stuck with an old autostart entry would never
+    //! receive fixes in the shipped desktop file.
+    QFile importer(QStringLiteral(LATTE_SOURCE_DIR "/app/layouts/importer.cpp"));
+    QVERIFY(importer.open(QFile::ReadOnly));
+    const QString content = QString::fromUtf8(importer.readAll());
+
+    QVERIFY(content.contains(QStringLiteral("lastModified()")));
+    QVERIFY(content.contains(QStringLiteral("autostartFile.remove()")));
 }
 
 void SourceContractTest::cmakeWarningRelaxationLivesInModule()

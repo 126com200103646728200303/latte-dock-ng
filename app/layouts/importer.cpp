@@ -536,23 +536,37 @@ void Importer::enableAutostart()
     }
 
     QFile autostartFile(Latte::configPath() + "/autostart/org.kde.latte-dock.desktop");
-    QFile metaFile(standardPath("applications/org.kde.latte-dock.desktop", false));
+    //! local-first so user-mode (or user-patched) installs take priority
+    //! over a stale system desktop file — important after adding new keys
+    //! such as X-KDE-autostart-phase.
+    const QString metaFilePath = standardPath("applications/org.kde.latte-dock.desktop", true);
+    QFile metaFile(metaFilePath);
 
-    if (autostartFile.exists()) {
-        //! if autostart file already exists, do nothing
+    if (!metaFile.exists()) {
         return;
     }
 
-    if (metaFile.exists()) {
-        //! check if autostart folder exists and create otherwise
-        QDir autostartDir(Latte::configPath() + "/autostart");
-        if (!autostartDir.exists()) {
-            QDir configDir(Latte::configPath());
-            configDir.mkdir("autostart");
-        }
-
-        metaFile.copy(autostartFile.fileName());
+    //! check if autostart folder exists and create otherwise
+    QDir autostartDir(Latte::configPath() + "/autostart");
+    if (!autostartDir.exists()) {
+        QDir configDir(Latte::configPath());
+        configDir.mkdir("autostart");
     }
+
+    if (autostartFile.exists()) {
+        //! Update the autostart file when the system desktop file is newer
+        //! (e.g. after a package upgrade that added X-KDE-autostart-phase).
+        QFileInfo autostartInfo(autostartFile.fileName());
+        QFileInfo metaInfo(metaFilePath);
+
+        if (autostartInfo.lastModified() >= metaInfo.lastModified()) {
+            return;
+        }
+        //! remove the outdated file so it can be replaced below
+        autostartFile.remove();
+    }
+
+    metaFile.copy(autostartFile.fileName());
 }
 
 void Importer::disableAutostart()
