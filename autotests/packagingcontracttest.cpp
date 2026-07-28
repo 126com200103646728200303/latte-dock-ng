@@ -147,7 +147,7 @@ void PackagingContractTest::distroInstallPackagingContractsStayInSync()
     QVERIFY(gentooEbuildVerifySource.contains(QStringLiteral("PROPERTIES=\"live\"")));
     QVERIFY(gentooEbuildVerifySource.contains(QStringLiteral("latte-dock-ng-${version}.ebuild")));
     QVERIFY(gentooEbuildVerifySource.contains(QStringLiteral("ebuild")));
-    QVERIFY(gentooEbuildVerifySource.contains(QStringLiteral(">=kde-plasma/kscreenlocker-6.5:6")));
+    QVERIFY(gentooEbuildVerifySource.contains(QStringLiteral(">=kde-plasma/kscreenlocker-6.3:6")));
     QVERIFY(gentooEbuildVerifySource.contains(QStringLiteral("clean configure compile install")));
 
     QFile releaseWorkflow(QStringLiteral(LATTE_SOURCE_DIR "/.github/workflows/release.yml"));

@@ -14,7 +14,7 @@ set(FAQS "https://github.com/ruizhi-lab/latte-dock-ng#readme")
 
 set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.0.0")
-set(PLASMA_MIN_VERSION "6.5.0")
+set(PLASMA_MIN_VERSION "6.3.0")
 set(KDE_COMPILERSETTINGS_LEVEL "6.0.0")
 
 # Accepted from install.sh for compatibility with KDE-style build knobs.
@@ -243,7 +243,7 @@ latte_apply_relaxed_warning_flags()
 #add format security check
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat -Werror=format-security")
 # KDECompilerSettings may enforce stricter Qt macros depending on distro patching.
-# Keep Latte sources buildable on Plasma 6.5+ by explicitly dropping those macros here.
+# Keep Latte sources buildable on Plasma 6.3+ by explicitly dropping those macros here.
 remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_RESTRICTED_CAST_FROM_ASCII -DQT_NO_KEYWORDS)
 add_compile_options(-UQT_NO_CAST_FROM_ASCII -UQT_RESTRICTED_CAST_FROM_ASCII)
 
