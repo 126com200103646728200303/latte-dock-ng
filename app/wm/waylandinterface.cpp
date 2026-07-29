@@ -229,11 +229,21 @@ public:
         //! A 1px visual surface means KWin only renders blur on a 1px strip at the screen edge,
         //! making the ghost window essentially invisible regardless of layer.
         const int visualThickness = 1;
+#ifdef LATTE_LAYERSHELL_HAS_DESIRED_SIZE
         if (location == Plasma::Types::TopEdge || location == Plasma::Types::BottomEdge) {
             layerWindow->setDesiredSize(QSize(0, visualThickness));
         } else {
             layerWindow->setDesiredSize(QSize(visualThickness, 0));
         }
+#else
+        // setDesiredSize not available in older liblayershellqtinterface (e.g. Debian 13).
+        // Fall back to QWindow::resize to set a 1 px visual surface.
+        if (location == Plasma::Types::TopEdge || location == Plasma::Types::BottomEdge) {
+            resize(0, visualThickness);
+        } else {
+            resize(visualThickness, 0);
+        }
+#endif
 
         m_validGeometry = rect;
 

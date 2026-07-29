@@ -86,6 +86,21 @@ if(LATTE_LAYERSHELL_HAS_SET_SCREEN)
 else()
     message(STATUS "LayerShellQt::Window::setScreen not available — using QWindow::setScreen only")
 endif()
+
+# Detect whether LayerShellQt::Window::setDesiredSize(QSize) is available.
+# It was added in a later LayerShellQt 6.x release and is absent from
+# the liblayershellqtinterface shipped by Debian 13 Trixie.
+try_compile(
+    LATTE_LAYERSHELL_HAS_DESIRED_SIZE
+    SOURCES ${CMAKE_SOURCE_DIR}/cmake/CheckLayerShellDesiredSize.cpp
+    LINK_LIBRARIES LayerShellQt::Interface Qt6::Core Qt6::Gui
+)
+if(LATTE_LAYERSHELL_HAS_DESIRED_SIZE)
+    add_definitions(-DLATTE_LAYERSHELL_HAS_DESIRED_SIZE)
+    message(STATUS "LayerShellQt::Window::setDesiredSize detected — enabled")
+else()
+    message(STATUS "LayerShellQt::Window::setDesiredSize not available — using QWindow::resize fallback")
+endif()
 find_package(KF6Declarative ${KF6_MIN_VERSION} REQUIRED CONFIG)
 
 find_package(LibTaskManager ${PLASMA_MIN_VERSION} REQUIRED)
