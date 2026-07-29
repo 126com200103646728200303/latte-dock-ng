@@ -53,6 +53,7 @@ private Q_SLOTS:
     void enableAutostartExitsImmediately();
     void waylandCheckHasRetryMechanism();
     void enableAutostartUpdatesOutdatedFile();
+    void autoSizeLoopsUseInequalityNotStrictEquality();
     void cmakeWarningRelaxationLivesInModule();
     void cmakeFindsQtCoreToolsBeforeKdeInstallDirs();
     void qtQuickGpuPreferenceKeepsSoftwareFallbackAvailable();
@@ -1362,6 +1363,25 @@ void SourceContractTest::enableAutostartUpdatesOutdatedFile()
 
     QVERIFY(content.contains(QStringLiteral("lastModified()")));
     QVERIFY(content.contains(QStringLiteral("autostartFile.remove()")));
+}
+
+void SourceContractTest::autoSizeLoopsUseInequalityNotStrictEquality()
+{
+    //! AutoSize.qml uses automaticStep=8 in its shrink/grow do-while
+    //! loops.  The termination guards must use inequality (> / <), not
+    //! strict equality (!==), otherwise icon sizes whose difference from
+    //! the boundary is not a multiple of 8 skip past the guard value and
+    //! loop forever at ~100% CPU.
+    QFile autoSize(QStringLiteral(LATTE_SOURCE_DIR
+        "/containment/package/contents/ui/abilities/AutoSize.qml"));
+    QVERIFY(autoSize.open(QFile::ReadOnly));
+    const QString content = QString::fromUtf8(autoSize.readAll());
+
+    QVERIFY(content.contains(QStringLiteral("(nextIconSize > 16)")));
+    QVERIFY(!content.contains(QStringLiteral("(nextIconSize !== 16)")));
+
+    QVERIFY(content.contains(QStringLiteral("(nextIconSize2 < metrics.maxIconSize )")));
+    QVERIFY(!content.contains(QStringLiteral("(nextIconSize2 !== metrics.maxIconSize )")));
 }
 
 void SourceContractTest::cmakeWarningRelaxationLivesInModule()
