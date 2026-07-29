@@ -214,7 +214,7 @@ Item {
                     var factor = nextIconSize / metrics.iconSize;
                     var nextLength = factor * layoutLength;
 
-                } while ( (nextLength>toShrinkLimit) && (nextIconSize !== 16));
+                } while ( (nextLength>toShrinkLimit) && (nextIconSize > 16));
 
                 var intLength = Math.round(layoutLength);
                 var intNextLength = Math.round(nextLength);
@@ -238,7 +238,7 @@ Item {
                     if (nextLength2 < toGrowLimit) {
                         foundGoodSize = nextIconSize2;
                     }
-                } while ( (nextLength2<toGrowLimit) && (nextIconSize2 !== metrics.maxIconSize ));
+                } while ( (nextLength2<toGrowLimit) && (nextIconSize2 < metrics.maxIconSize ));
 
                 var intLength2 = Math.round(layoutLength);
                 var intNextLength2 = Math.round(nextLength2);
