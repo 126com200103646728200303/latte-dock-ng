@@ -63,7 +63,9 @@ Item{
     function init(){
         //console.log ("Nooo 1 : "+root.noTasksInAnimation);
         if(!launchedAlready) {
-            taskItem.abilities.parabolic.invkClearZoom();
+
+            // the taskItem.abilities.parabolic.invkClearZoom has been disabled to prevent it from recovering after clicked the icon
+
             launchedAlready = true;
             taskItem.abilities.animations.needThickness.addEvent(needThicknessEvent);
 
@@ -92,7 +94,7 @@ Item{
         }
 
         if(root.launcherBouncingEnabled) {
-            taskItem.animationStarted();
+
             init();
             launcherAnimationLoader.item.start();
         } else {

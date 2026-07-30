@@ -19,39 +19,25 @@ SequentialAnimation{
         }
     }
 
-    //Ghost animation that acts as a delayer
+    //! I think the Ghost animation is useless, why don't we make other animations longer?
+    //! Here disabled ParallelAnimation to prevent the zoom recovering...
+    // make the second rise animation alone
     PropertyAnimation {
-        target: taskItem.parabolicItem
-        property: "opacity"
-        to: 1
-        duration:  50
-        easing.type: Easing.InQuad
-    }
-    //end of ghost animation
-
-    ParallelAnimation {
-        PropertyAnimation {
-            target: taskItem.parabolicItem
-            property: "zoom"
-            to: 1
-            duration: launcherAnimation.speed
-            easing.type: Easing.OutQuad
-        }
-
-        PropertyAnimation {
-            target: taskItem
-            property: bouncePropertyName
-            to: taskItem.abilities.metrics.iconSize
-            duration: launcherAnimation.speed
-            easing.type: Easing.OutQuad
-        }
+        target: taskItem
+        property: bouncePropertyName
+        to: taskItem.abilities.metrics.iconSize
+        //! make the duration a little longer to make it seems more fluent and better
+        duration: 1.5 * launcherAnimation.speed
+        easing.type: Easing.OutQuad
     }
 
+    // this is the fall animation
     PropertyAnimation {
         target: taskItem
         property: bouncePropertyName
         to: 0
-        duration: 4*launcherAnimation.speed
+        // make the duration a little longer to make it seems more fluent and better
+        duration: 5 * launcherAnimation.speed
         easing.type: Easing.OutBounce
     }
 

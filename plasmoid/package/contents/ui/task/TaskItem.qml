@@ -117,10 +117,7 @@ AbilityItem.BasicItem {
     // Keep hover wave active for neighboring tasks while dragging. Only the
     // dragged source item itself should block parabolic updates.
     parabolicItem.isParabolicEventBlocked: ((root.dragSource !== null) && (root.dragSource === taskItem))
-                                           || !hoverEnabled
                                            || !taskItem.abilities.myView.isShownFully
-                                           || inAnimation
-                                           || (inBlockingAnimation && !inAttentionBuiltinAnimation)
     parabolicItem.isUpdatingOnlySpacers: inAttentionBuiltinAnimation || inBouncingAnimation
 
     property alias hoverEnabled: taskMouseArea.hoverEnabled
