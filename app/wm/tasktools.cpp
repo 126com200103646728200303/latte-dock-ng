@@ -638,7 +638,7 @@ KService::List servicesFromCmdLine(const QString &_cmdLine, const QString &proce
             ignore = runtimes.contains(cmdLine.mid(slash + 1));
         }
 
-        if (ignore) {
+        if (ignore && firstSpace >= 0) {
             return servicesFromCmdLine(_cmdLine.mid(firstSpace + 1), processName, rulesConfig);
         }
     }

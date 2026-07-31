@@ -466,7 +466,7 @@ QString Layouts::uniqueLayoutName(QString name)
 
     QString namePart = name;
 
-    while (m_model->containsCurrentName(name)) {
+    while (m_model->containsCurrentName(name) && i < 10000) {
         name = namePart + " - " + QString::number(i);
         i++;
     }

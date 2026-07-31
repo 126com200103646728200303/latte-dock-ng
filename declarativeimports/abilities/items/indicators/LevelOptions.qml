@@ -30,11 +30,24 @@ Item {
 
     property Item indicator: null
 
+    // Guard against mutual re-entrant signal handling — if both properties
+    // were ever set to the same value simultaneously, the two handlers would
+    // flip-flop indefinitely.  The reentry guard limits each handler to one
+    // pass.
+    property bool _updatingBackground: false
+    property bool _updatingForeground: false
+
     onIsBackgroundChanged: {
+        if (_updatingBackground) return;
+        _updatingForeground = true;
         isForeground = !isBackground;
+        _updatingForeground = false;
     }
 
     onIsForegroundChanged: {
+        if (_updatingForeground) return;
+        _updatingBackground = true;
         isBackground = !isForeground;
+        _updatingBackground = false;
     }
 }

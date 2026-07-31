@@ -749,7 +749,7 @@ QString Importer::uniqueLayoutName(QString name)
 
     QString namePart = name;
 
-    while (layoutExists(name)) {
+    while (layoutExists(name) && i < 10000) {
         name = namePart + " - " + QString::number(i);
         i++;
     }
