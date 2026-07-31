@@ -19,24 +19,23 @@ SequentialAnimation{
         }
     }
 
-    //! I think the Ghost animation is useless, why don't we make other animations longer?
-    //! Here disabled ParallelAnimation to prevent the zoom recovering...
-    // make the second rise animation alone
+    // Rise phase: drive the launcher icon upward by animating its bounce
+    // offset to the full icon size.  The zoom property is deliberately NOT
+    // touched here — letting parabolic continue tracking the pointer so the
+    // icon stays scaled to the correct size throughout the bounce.
     PropertyAnimation {
         target: taskItem
         property: bouncePropertyName
         to: taskItem.abilities.metrics.iconSize
-        //! make the duration a little longer to make it seems more fluent and better
         duration: 1.5 * launcherAnimation.speed
         easing.type: Easing.OutQuad
     }
 
-    // this is the fall animation
+    // Fall phase: bounce the icon back to its resting position.
     PropertyAnimation {
         target: taskItem
         property: bouncePropertyName
         to: 0
-        // make the duration a little longer to make it seems more fluent and better
         duration: 5 * launcherAnimation.speed
         easing.type: Easing.OutBounce
     }

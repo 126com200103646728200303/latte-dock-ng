@@ -36,13 +36,13 @@ Loader {
 
     readonly property int margin: abilityItem.abilities.metrics.margin.screenEdge + abilityItem.abilities.metrics.margin.tailThickness
 
-    active: abilityItem.isSeparatorVisible
+    active: abilityItem.isSeparator
 
     sourceComponent: Item {
         ///Shadow for separator
         MultiEffect{
             anchors.fill: separatorItem
-            visible: abilityItem.isSeparatorVisible
+            visible: abilityItem.isSeparator
                      && abilityItem.abilities.myView.itemShadow.isEnabled
                      && abilityItem.abilities.environment.isGraphicsSystemAccelerated
             opacity: visible ? 1.0 : 0.0

@@ -419,6 +419,12 @@ PlasmoidItem {
             root.draggingFinished();
             tasksModel.syncLaunchers();
 
+            // Force indexer bindings to re-evaluate after being frozen
+            // (updateIsBlocked=true) during drag.  The QML engine may not
+            // detect property changes that happened inside loop bodies while
+            // the binding was deactivated.
+            _appletAbilities.indexer.reorderToken++;
+
             restoreDraggingPhaseTimer.start();
         } else {
             inDraggingPhase = true;
@@ -802,7 +808,8 @@ PlasmoidItem {
         animations.local.speedFactor.current: plasmoid.configuration.durationTime
         animations.local.requirements.zoomFactor: hasHighThicknessAnimation && LatteCore.WindowSystem.compositingActive ? 1.65 : 1.0
 
-        indexer.updateIsBlocked: root.inDraggingPhase || root.inActivityChange || tasksExtendedManager.launchersInPausedStateCount>0
+        // override by Connections for inDraggingPhase (binding not reliable here)
+        indexer.updateIsBlocked: root.inActivityChange
 
         // Keep a temporary fallback when latteBridge attachment is delayed.
         // Once bridge is ready in Latte, use bridge indicators only to avoid
@@ -840,6 +847,23 @@ PlasmoidItem {
         requires.screenEdgeMarginSupported: true
 
         thinTooltip.local.showIsBlocked: root.contextMenu || root.windowPreviewIsShown
+    }
+
+    // Signal handlers always fire reliably (unlike bindings on root.* properties
+    // inside AppletAbilities which miss changes).  Keep updateIsBlocked in sync
+    // with inDraggingPhase via imperative assignment.
+    // Freeze the indexer during drag to prevent binding loops while items
+    // are being reordered.  When drag ends, inDraggingPhase becomes false
+    // and updateIsBlocked returns to the binding value (inActivityChange only).
+    // launchersInPausedStateCount is intentionally NOT included — it stays >0
+    // for minutes after launcher animations and would freeze the indexer long
+    // after drag completes.
+    Connections {
+        target: root
+        function onInDraggingPhaseChanged() {
+            _appletAbilities.indexer.updateIsBlocked =
+                root.inDraggingPhase || root.inActivityChange;
+        }
     }
 
     Timer{

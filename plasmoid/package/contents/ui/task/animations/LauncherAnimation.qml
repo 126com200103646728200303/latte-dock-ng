@@ -38,7 +38,6 @@ Item{
             clearAnimationsSignals();
 
             taskItem.setBlockingAnimation(false);
-            taskItem.animationEnded();
         }
     }
 
@@ -64,7 +63,8 @@ Item{
         //console.log ("Nooo 1 : "+root.noTasksInAnimation);
         if(!launchedAlready) {
 
-            // the taskItem.abilities.parabolic.invkClearZoom has been disabled to prevent it from recovering after clicked the icon
+            // Do not reset parabolic zoom via invkClearZoom — let zoom stay at
+            // its current level so bounce and parabolic run concurrently.
 
             launchedAlready = true;
             taskItem.abilities.animations.needThickness.addEvent(needThicknessEvent);

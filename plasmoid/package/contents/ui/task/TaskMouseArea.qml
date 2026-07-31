@@ -19,8 +19,10 @@ MouseArea {
     // resulting in press without release and missed task activation.
     preventStealing: true
 
-    // prevent from freeze
-    hoverEnabled: true
+    // Keep hover enabled during launcher bounce so parabolic zoom continues
+    // tracking mouse distance, but still guard separators and startup items
+    // which should never participate in hover-triggered behaviour.
+    hoverEnabled: taskItem.visible && !isStartup && !isSeparator
 
     property bool pressed: false
     // Drag should start only after resistance delay expires and pointer
