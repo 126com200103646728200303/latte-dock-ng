@@ -592,10 +592,12 @@ void Corona::unload()
 {
     qDebug() << "unload: removing containments...";
 
-    while (!containments().isEmpty()) {
-        //deleting a containment will remove it from the list due to QObject::destroyed connect in Corona
-        //this form doesn't crash, while qDeleteAll(containments()) does
-        delete containments().first();
+    // Take a copy — the QObject::destroyed signal removes entries
+    // from the live list, but we iterate the snapshot to stay safe
+    // even if a signal connection is severed.
+    const auto snapshot = containments();
+    for (Plasma::Containment *c : snapshot) {
+        delete c;
     }
 }
 
@@ -1216,7 +1218,16 @@ int Corona::screenForContainment(const Plasma::Containment *containment) const
     //case in which this containment is child of an applet, hello systray :)
     if (Plasma::Applet *parentApplet = qobject_cast<Plasma::Applet *>(containment->parent())) {
         if (Plasma::Containment *cont = parentApplet->containment()) {
-            return screenForContainment(cont);
+            // Walk parent containment chain with a depth guard.
+            const Plasma::Containment *walker = cont;
+            for (int depth = 0; depth < 16 && walker; ++depth) {
+                if (Plasma::Applet *a = qobject_cast<Plasma::Applet *>(walker->parent())) {
+                    walker = a->containment();
+                } else {
+                    break;
+                }
+            }
+            return walker ? screenForContainment(walker) : -1;
         } else {
             return -1;
         }

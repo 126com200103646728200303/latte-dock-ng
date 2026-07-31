@@ -146,8 +146,11 @@ void OriginalView::cleanClones()
         return;
     }
 
-    while(!m_clones.isEmpty()) {
-        removeClone(m_clones[0]);
+    // Drain from a local copy — removeClone() may synchronously trigger
+    // signal chains that re-enter and push new entries into m_clones.
+    const QList<ClonedView *> snapshot = m_clones;
+    for (ClonedView *clone : snapshot) {
+        removeClone(clone);
     }
 }
 

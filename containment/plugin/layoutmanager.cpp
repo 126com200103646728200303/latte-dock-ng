@@ -616,11 +616,15 @@ QObject *LayoutManager::resolveAppletQuickItemObject(QObject *applet) const
         return applet;
     }
 
-    auto resolveFromBackendProperty = [this, applet](const char *propertyName) -> QObject * {
+    QSet<QObject *> visited;
+    visited.insert(applet);
+
+    auto resolveFromBackendProperty = [this, applet, &visited](const char *propertyName) -> QObject * {
         QObject *candidate = applet->property(propertyName).value<QObject *>();
-        if (!candidate || candidate == applet) {
+        if (!candidate || candidate == applet || visited.contains(candidate)) {
             return nullptr;
         }
+        visited.insert(candidate);
 
         if (qobject_cast<PlasmaQuick::AppletQuickItem *>(candidate)) {
             return candidate;
