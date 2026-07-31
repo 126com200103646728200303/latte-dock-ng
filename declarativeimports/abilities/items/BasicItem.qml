@@ -84,7 +84,10 @@ Item{
     property bool isSeparator: false
     property bool isSeparatorInRealLength: false
     property bool isSeparatorHidden: false
-    readonly property bool isSeparatorVisible: isSeparator && !isSeparatorHidden && !tailItemIsSeparator
+    // During drag, indices shuffle and isSeparatorHidden may be stale due to
+    // binding evaluation order.  isSeparatorInRealLength is set directly from
+    // root.dragSource and is reliable — force visibility when it is active.
+    readonly property bool isSeparatorVisible: isSeparator && (isSeparatorInRealLength || (!isSeparatorHidden && !tailItemIsSeparator))
     property bool preserveIndicatorInInitialPosition: false
 
     property bool containsMouse: false

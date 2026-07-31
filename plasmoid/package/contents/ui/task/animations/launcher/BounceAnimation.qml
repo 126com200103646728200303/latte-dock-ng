@@ -19,39 +19,24 @@ SequentialAnimation{
         }
     }
 
-    //Ghost animation that acts as a delayer
+    // Rise phase: drive the launcher icon upward by animating its bounce
+    // offset to the full icon size.  The zoom property is deliberately NOT
+    // touched here — letting parabolic continue tracking the pointer so the
+    // icon stays scaled to the correct size throughout the bounce.
     PropertyAnimation {
-        target: taskItem.parabolicItem
-        property: "opacity"
-        to: 1
-        duration:  50
-        easing.type: Easing.InQuad
-    }
-    //end of ghost animation
-
-    ParallelAnimation {
-        PropertyAnimation {
-            target: taskItem.parabolicItem
-            property: "zoom"
-            to: 1
-            duration: launcherAnimation.speed
-            easing.type: Easing.OutQuad
-        }
-
-        PropertyAnimation {
-            target: taskItem
-            property: bouncePropertyName
-            to: taskItem.abilities.metrics.iconSize
-            duration: launcherAnimation.speed
-            easing.type: Easing.OutQuad
-        }
+        target: taskItem
+        property: bouncePropertyName
+        to: taskItem.abilities.metrics.iconSize
+        duration: 1.5 * launcherAnimation.speed
+        easing.type: Easing.OutQuad
     }
 
+    // Fall phase: bounce the icon back to its resting position.
     PropertyAnimation {
         target: taskItem
         property: bouncePropertyName
         to: 0
-        duration: 4*launcherAnimation.speed
+        duration: 5 * launcherAnimation.speed
         easing.type: Easing.OutBounce
     }
 

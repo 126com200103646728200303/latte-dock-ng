@@ -14,6 +14,10 @@ AbilityDefinition.Indexer {
 
     property bool updateIsBlocked: false
 
+    // Incremented by the host when drag ends to force indexer bindings to
+    // re-evaluate after being frozen (updateIsBlocked) during the drag.
+    property int reorderToken: 0
+
     readonly property bool isActive: bridge !== null
     readonly property bool inMarginsArea: isActive ? bridge.indexer.inMarginsArea : false
     readonly property bool tailAppletIsSeparator: isActive ? bridge.indexer.tailAppletIsSeparator : false
@@ -60,6 +64,7 @@ AbilityDefinition.Indexer {
         property: "firstTailItemIsSeparator"
         when: isReady
         value: {
+            var _t = _indexer.reorderToken;
             if (_indexer.visibleItemsCount === _indexer.layout.children.length) {
                 return false;
             }
@@ -79,6 +84,7 @@ AbilityDefinition.Indexer {
         property: "lastHeadItemIsSeparator"
         when: isReady
         value: {
+            var _t = _indexer.reorderToken;
             if (_indexer.visibleItemsCount === _indexer.layout.children.length) {
                 return false;
             }
@@ -100,12 +106,13 @@ AbilityDefinition.Indexer {
         property: "firstVisibleItemIndex"
         when: isReady
         value: {
+            var _t = _indexer.reorderToken;
             var ind = maxIndex;
             for(var i=0; i<layout.children.length; ++i) {
                 var item = layout.children[i];
                 if (item && item.itemIndex>=0
                         && !item.isSeparator /*not using "separators" array to avoid binding loops*/
-                        && !(item.isHidden || item.isSeparatorHidden) /*not using "hidden" array to avoid binding loops*/
+                        && !item.isHidden /*not using "hidden" array to avoid binding loops*/
                         && item.itemIndex < ind) {
                     ind = item.itemIndex;
                 }
@@ -120,6 +127,7 @@ AbilityDefinition.Indexer {
         property: "lastVisibleItemIndex"
         when: isReady
         value: {
+            var _t = _indexer.reorderToken;
             var ind = -1;
 
             for(var i=0; i<layout.children.length; ++i) {
@@ -127,7 +135,7 @@ AbilityDefinition.Indexer {
 
                 if (item && item.itemIndex>=0
                         && !item.isSeparator /*not using "separators" array to avoid binding loops*/
-                        && !(item.isHidden || item.isSeparatorHidden) /*not using "hidden" array to avoid binding loops*/
+                        && !item.isHidden /*not using "hidden" array to avoid binding loops*/
                         && item.itemIndex > ind) {
                      //console.log("org/kde/latte SETTING UP ::: " + item.itemIndex + " / " + layout.children.length);
                     ind = item.itemIndex;
@@ -177,6 +185,7 @@ AbilityDefinition.Indexer {
         property: "hidden"
         when: isReady
         value: {
+            var _t = _indexer.reorderToken;
             var hdns = [];
 
             for (var i=0; i<layout.children.length; ++i){
@@ -195,6 +204,7 @@ AbilityDefinition.Indexer {
         property: "separators"
         when: isReady
         value: {
+            var _t = _indexer.reorderToken;
             var seps = [];
 
             for (var i=0; i<layout.children.length; ++i){

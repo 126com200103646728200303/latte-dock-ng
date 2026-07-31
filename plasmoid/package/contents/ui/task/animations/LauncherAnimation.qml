@@ -38,7 +38,6 @@ Item{
             clearAnimationsSignals();
 
             taskItem.setBlockingAnimation(false);
-            taskItem.animationEnded();
         }
     }
 
@@ -63,7 +62,10 @@ Item{
     function init(){
         //console.log ("Nooo 1 : "+root.noTasksInAnimation);
         if(!launchedAlready) {
-            taskItem.abilities.parabolic.invkClearZoom();
+
+            // Do not reset parabolic zoom via invkClearZoom — let zoom stay at
+            // its current level so bounce and parabolic run concurrently.
+
             launchedAlready = true;
             taskItem.abilities.animations.needThickness.addEvent(needThicknessEvent);
 
@@ -92,7 +94,7 @@ Item{
         }
 
         if(root.launcherBouncingEnabled) {
-            taskItem.animationStarted();
+
             init();
             launcherAnimationLoader.item.start();
         } else {

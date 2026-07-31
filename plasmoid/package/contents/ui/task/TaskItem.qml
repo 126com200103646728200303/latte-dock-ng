@@ -53,7 +53,11 @@ AbilityItem.BasicItem {
         return taskItem.abilities.launchers.isSeparator(url);
     }
 
-    isSeparatorHidden: isSeparator && (lastValidIndex > taskItem.abilities.indexer.lastVisibleItemIndex)
+    // Use itemIndex (always current) instead of lastValidIndex (stale after
+    // drag reorder).  Fall back to lastValidIndex only during removal when
+    // itemIndex is -1.
+    isSeparatorHidden: isSeparator
+                       && ((itemIndex >= 0 ? itemIndex : lastValidIndex) > taskItem.abilities.indexer.lastVisibleItemIndex)
     isSeparatorInRealLength: isSeparator && root.dragSource
 
     containsMouse: taskMouseArea.containsMouse || parabolicAreaContainsMouse
@@ -114,14 +118,12 @@ AbilityItem.BasicItem {
 
     preserveIndicatorInInitialPosition: inBouncingAnimation || inAttentionBuiltinAnimation || inNewWindowBuiltinAnimation
 
-    // Keep hover wave active for neighboring tasks while dragging. Only the
-    // dragged source item itself should block parabolic updates.
+    // Allow parabolic zoom to track mouse distance continuously during
+    // launcher bounce animation so the icon size stays reactive to pointer
+    // position instead of freezing at the pre-click zoom level.
     parabolicItem.isParabolicEventBlocked: ((root.dragSource !== null) && (root.dragSource === taskItem))
-                                           || !hoverEnabled
                                            || !taskItem.abilities.myView.isShownFully
-                                           || inAnimation
-                                           || (inBlockingAnimation && !inAttentionBuiltinAnimation)
-    parabolicItem.isUpdatingOnlySpacers: inAttentionBuiltinAnimation || inBouncingAnimation
+    parabolicItem.isUpdatingOnlySpacers: inAttentionBuiltinAnimation
 
     property alias hoverEnabled: taskMouseArea.hoverEnabled
     property alias pressed: taskMouseArea.pressed

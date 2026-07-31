@@ -57,7 +57,7 @@ Item{
     Behavior on nHiddenSize {
         NumberAnimation{
             duration: (abilityItem.isHiddenSpacerAnimated || restoreAnimation.running)
-                      ? 3 * abilityItem.animationTime : 0
+                      ? abilityItem.animationTime : 0
         }
     }
 
@@ -76,7 +76,8 @@ Item{
         }
     }
 
-    //! Delayer
+    //! Delayer — fire on the next idle frame (≈16ms) instead of the old 400ms
+    //! to break binding loops without a visible position lag after drag reorder.
     onSeparatorSpaceChanged: {
         if (!hiddenSizeDelayer.running) {
             hiddenSizeDelayer.start();
@@ -90,6 +91,6 @@ Item{
     //! during the activity change
     Timer {
         id: hiddenSizeDelayer
-        interval: 400
+        interval: 32
     }
 }
